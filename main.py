@@ -25,6 +25,7 @@ def load_seeds():
     return Bunch(
         data=data,
         target = target,
+        target_names = target_names,
         feature_names= feature_names,
         filename=data_file_name
     )
