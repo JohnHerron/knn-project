@@ -2,7 +2,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.utils import Bunch
 import numpy as np
 import csv
-from os import getcwd
+
 
 def main():
     seed_data = load_seeds()
