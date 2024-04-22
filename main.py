@@ -15,7 +15,7 @@ def load_seeds():
     feature_names = [
         "area A",
         "perimeter P", 
-        "compactness C = 4*pi$A/P^2", 
+        "compactness C = 4*pi*A/P^2", 
         "length of kernel",
         "width of kernel",
         "asymmetry coefficient",
