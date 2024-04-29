@@ -14,6 +14,10 @@ import csv
 def main():
     seed_data = load_seeds()
 
+    # Apply PCA
+    pca = PCA(n_components=5)
+    x_pca = pca.fit_transform(seed_data.data)
+
     # knn classification
     x = seed_data.data
     y = seed_data.target
