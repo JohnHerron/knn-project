@@ -1,6 +1,7 @@
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import cross_val_predict
 from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import make_pipeline
 from sklearn.model_selection import KFold
@@ -23,12 +24,22 @@ def main():
     print(r2_score(y, y_pred))
 
     # test for k, which produces lowest error?
+    # mean squared error
     error = []
     for k in range(1,51):
         classifier_pipeline = make_pipeline(StandardScaler(), KNeighborsClassifier(n_neighbors=k))
         y_pred = cross_val_predict(classifier_pipeline, x, y, cv=5)
         error.append(mean_squared_error(y,y_pred))
-    plt.plot(range(1,51),error)
+    plt.plot(range(1,51), error)
+    plt.show()
+
+    # r squared error
+    error = []
+    for k in range(1,51):
+        classifier_pipeline = make_pipeline(StandardScaler(), KNeighborsClassifier(n_neighbors=k))
+        y_pred = cross_val_predict(classifier_pipeline, x, y, cv=5)
+        error.append(r2_score(y,y_pred))
+    plt.plot(range(1,51), error)
     plt.show()
 
 
