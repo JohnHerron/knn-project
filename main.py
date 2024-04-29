@@ -17,8 +17,8 @@ def main():
     x = seed_data.data
     y = seed_data.target
     classifier_pipeline = make_pipeline(StandardScaler(), KNeighborsClassifier(n_neighbors=15))
-    cv = KFold(n_splits=5, random_state=0, shuffle=True)
-    y_pred = cross_val_predict(classifier_pipeline, x, y, cv=cv)
+    #cv = KFold(n_splits=5, random_state=0, shuffle=True)
+    y_pred = cross_val_predict(classifier_pipeline, x, y, cv=5)
     print(mean_squared_error(y, y_pred))
     print(r2_score(y, y_pred))
 
