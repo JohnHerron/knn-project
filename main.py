@@ -3,7 +3,7 @@ from sklearn.model_selection import cross_val_predict
 from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
-from sklearn.pipeline import make_pipeline
+from sklearn.pipeline import make_pipeline, Pipeline
 from sklearn.model_selection import KFold
 import matplotlib.pyplot as plt
 from sklearn.utils import Bunch
@@ -15,35 +15,39 @@ def main():
     seed_data = load_seeds()
 
     # Apply PCA
-    pca = PCA(n_components=5)
-    x_pca = pca.fit_transform(seed_data.data)
+    pipeline = make_pipeline(StandardScaler(), PCA(n_components=4))
+    x_pca = pipeline.fit_transform(seed_data.data)
+
+    print(x_pca)
 
     # knn classification
-    x = seed_data.data
     y = seed_data.target
-    classifier_pipeline = make_pipeline(StandardScaler(), KNeighborsClassifier(n_neighbors=15))
+    classifier_pipeline = make_pipeline(
+        StandardScaler(), KNeighborsClassifier(n_neighbors=15))
     cv = KFold(n_splits=5, random_state=0, shuffle=True)
-    y_pred = cross_val_predict(classifier_pipeline, x, y, cv=cv)
+    y_pred = cross_val_predict(classifier_pipeline, x_pca, y, cv=cv)
     print(mean_squared_error(y, y_pred))
     print(r2_score(y, y_pred))
 
     # test for k, which produces lowest error?
     # mean squared error
     error = []
-    for k in range(1,51):
-        classifier_pipeline = make_pipeline(StandardScaler(), KNeighborsClassifier(n_neighbors=k))
-        y_pred = cross_val_predict(classifier_pipeline, x, y, cv=5)
-        error.append(mean_squared_error(y,y_pred))
-    plt.plot(range(1,51), error)
+    for k in range(1, 51):
+        classifier_pipeline = make_pipeline(
+            StandardScaler(), KNeighborsClassifier(n_neighbors=k))
+        y_pred = cross_val_predict(classifier_pipeline, x_pca, y, cv=5)
+        error.append(mean_squared_error(y, y_pred))
+    plt.plot(range(1, 51), error)
     plt.show()
 
     # r squared error
     error = []
-    for k in range(1,51):
-        classifier_pipeline = make_pipeline(StandardScaler(), KNeighborsClassifier(n_neighbors=k))
-        y_pred = cross_val_predict(classifier_pipeline, x, y, cv=5)
-        error.append(r2_score(y,y_pred))
-    plt.plot(range(1,51), error)
+    for k in range(1, 51):
+        classifier_pipeline = make_pipeline(
+            StandardScaler(), KNeighborsClassifier(n_neighbors=k))
+        y_pred = cross_val_predict(classifier_pipeline, x_pca, y, cv=5)
+        error.append(r2_score(y, y_pred))
+    plt.plot(range(1, 51), error)
     plt.show()
 
 
@@ -52,8 +56,8 @@ def load_seeds():
     data, target, target_names = load_csv_data(data_file_name=data_file_name)
     feature_names = [
         "area A",
-        "perimeter P", 
-        "compactness C = 4*pi*A/P^2", 
+        "perimeter P",
+        "compactness C = 4*pi*A/P^2",
         "length of kernel",
         "width of kernel",
         "asymmetry coefficient",
@@ -62,11 +66,12 @@ def load_seeds():
 
     return Bunch(
         data=data,
-        target = target,
-        target_names = target_names,
-        feature_names= feature_names,
+        target=target,
+        target_names=target_names,
+        feature_names=feature_names,
         filename=data_file_name
     )
+
 
 def load_csv_data(data_file_name):
     with open(data_file_name, "r", encoding="utf-8") as csv_file:
@@ -83,6 +88,7 @@ def load_csv_data(data_file_name):
             target[i] = np.asarray(ir[-1], dtype=int)
 
         return data, target, target_names
+
 
 if __name__ == "__main__":
     main()
