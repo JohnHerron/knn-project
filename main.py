@@ -3,25 +3,57 @@ from sklearn.model_selection import cross_val_predict
 from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
-from sklearn.pipeline import make_pipeline, Pipeline
+from sklearn.pipeline import make_pipeline
 from sklearn.model_selection import KFold
 import matplotlib.pyplot as plt
+from matplotlib.patches import Patch
 from sklearn.utils import Bunch
 import numpy as np
 import csv
+from plot_cv_indices import plot_cv_indices, cmap_cv
+
+from sklearn.model_selection import (
+    GroupKFold,
+    GroupShuffleSplit,
+    KFold,
+    ShuffleSplit,
+    StratifiedGroupKFold,
+    StratifiedKFold,
+    StratifiedShuffleSplit,
+    TimeSeriesSplit,
+)
 
 
 def main():
     seed_data = load_seeds()
 
     # Apply PCA
-    pipeline = make_pipeline(StandardScaler(), PCA(n_components=4))
+    pipeline = make_pipeline(StandardScaler(), PCA(n_components='mle'))
     x_pca = pipeline.fit_transform(seed_data.data)
 
     print(x_pca)
 
     # knn classification
     y = seed_data.target
+
+    # Cross-validation strategies
+    cvs = [StratifiedKFold, StratifiedShuffleSplit, KFold, TimeSeriesSplit]
+
+    for cv in cvs:
+        fig, ax = plt.subplots(figsize=(5, 3))
+        plot_cv_indices(cv(n_splits=5), x_pca, y, ax, n_splits=5)
+        ax.legend(
+            [Patch(color=cmap_cv(0.8)), Patch(color=cmap_cv(0.02))],
+            ["Testing set", "Training set"],
+            loc=(1.02, 0.8),
+        )
+        ax.set_title(cv.__name__)
+        # Make the legend fit
+        plt.tight_layout()
+        fig.subplots_adjust(right=0.7)
+        plt.show()
+
+    # manual k-15 test
     classifier_pipeline = make_pipeline(
         StandardScaler(), KNeighborsClassifier(n_neighbors=15))
     cv = KFold(n_splits=5, random_state=0, shuffle=True)
@@ -33,9 +65,10 @@ def main():
     # mean squared error
     error = []
     for k in range(1, 51):
+        cv = KFold(n_splits=5, random_state=0, shuffle=True)
         classifier_pipeline = make_pipeline(
             StandardScaler(), KNeighborsClassifier(n_neighbors=k))
-        y_pred = cross_val_predict(classifier_pipeline, x_pca, y, cv=5)
+        y_pred = cross_val_predict(classifier_pipeline, x_pca, y, cv=cv)
         error.append(mean_squared_error(y, y_pred))
     plt.plot(range(1, 51), error)
     plt.show()
